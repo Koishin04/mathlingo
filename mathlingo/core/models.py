@@ -102,3 +102,18 @@ class User:
             return round((correct_count / len(attempts)) * 100)
         except Exception:
             return 0
+        
+    def generate_history_report(self):
+        """A Generator that yields cleanly mapped string records of user logs."""
+        if not os.path.exists(LOG_FILE):
+            return
+        
+        with open(LOG_FILE, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            # Filter logs for current user
+            user_attempts = filter(lambda row: row['username'] == self.username, reader)
+            # Map raw rows into clean presentation strings
+            formatted_logs = map(lambda r: f"[{r['timestamp'][:10]}] {r['topic']}: {'✓' if r['success'] == 'True' else '✗'}", user_attempts)
+            
+            for log_entry in formatted_logs:
+                yield log_entry

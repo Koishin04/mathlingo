@@ -240,6 +240,52 @@ class MathLingoApp(ctk.CTk):
         ctk.CTkLabel(row, text=metrics_title, font=("Arial", 14), text_color="#6B7280").pack(side="left")
         ctk.CTkLabel(row, text=metrics_value, font=("Arial", 14, "bold"), text_color="#1F2937").pack(side="right")
 
+    def render_profile_view(self):
+        self.user.check_and_recover_hearts()
+        self.clear_viewport()
+        self.refresh_header_stats()
+        
+        prof_lbl = ctk.CTkLabel(self.viewport_frame, text="Profile", font=("Arial", 24, "bold"), text_color="#1F2937")
+        prof_lbl.pack(pady=20)
+        self.view_elements.append(prof_lbl)
+        
+        card = ctk.CTkFrame(self.viewport_frame, fg_color="#FFFFFF", width=400, border_width=2, border_color="#E5E7EB", corner_radius=16)
+        card.pack(pady=10, padx=20, fill="x")
+        self.view_elements.append(card)
+        
+        self.add_profile_stat_row(card, "User Profile Identifier", self.user.username)
+        self.add_profile_stat_row(card, "Accumulated Experience", f"{self.user.xp} XP")
+        self.add_profile_stat_row(card, "Total Verification Accuracy", f"{self.user.get_accuracy()}%")
+        self.add_profile_stat_row(card, "Unlocked Modules Count", f"{len(self.user.completed_topics)} / {len(ALL_TOPICS)}")
+
+        # --- NEW: History Section consuming your Generator/Iterator ---
+        history_title = ctk.CTkLabel(self.viewport_frame, text="Recent Activity Log", font=("Arial", 16, "bold"), text_color="#4B5563")
+        history_title.pack(pady=(20, 5))
+        self.view_elements.append(history_title)
+
+        # Create a container for the logs
+        history_card = ctk.CTkFrame(self.viewport_frame, fg_color="#F3F4F6", width=400, corner_radius=12)
+        history_card.pack(pady=5, padx=20, fill="x")
+        self.view_elements.append(history_card)
+
+        # Get the generator iterator
+        history_iterator = self.user.generate_history_report()
+        has_logs = False
+
+        # Iterate over the generator (Demonstrating Iterator/Generator mechanics)
+        for count, log_text in enumerate(history_iterator):
+            if count >= 3: # Only display the 3 most recent entries to keep the UI clean
+                break
+            has_logs = True
+            log_lbl = ctk.CTkLabel(history_card, text=log_text, font=("Courier New", 12), text_color="#374151", anchor="w")
+            log_lbl.pack(fill="x", padx=15, pady=6)
+            self.view_elements.append(log_lbl)
+
+        if not has_logs:
+            no_log_lbl = ctk.CTkLabel(history_card, text="No recent activities recorded.", font=("Arial", 12, "italic"), text_color="#9CA3AF")
+            no_log_lbl.pack(pady=15)
+            self.view_elements.append(no_log_lbl)
+            
 if __name__ == "__main__":
     app = MathLingoApp()
     app.mainloop()
